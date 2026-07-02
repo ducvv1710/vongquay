@@ -1,0 +1,853 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slide Tương Tác: Vòng Quay Hình Khối Mầm Non</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            background-color: #0f172a;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 1280px;
+            height: 720px;
+            margin: 0 auto;
+        }
+
+        .slide-container {
+            width: 1280px;
+            height: 720px;
+            position: relative;
+            background: radial-gradient(circle at center, #1e3a8a 0%, #0f172a 100%);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- GIAI ĐOẠN 1: HỘP QUÀ KHỞI ĐỘNG --- */
+        .gift-box-wrapper {
+            position: absolute;
+            z-index: 50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .gift-title {
+            color: #ffd100;
+            text-align: center;
+            margin-bottom: 35px;
+            text-transform: uppercase;
+            font-size: 26px;
+            font-weight: 900;
+            text-shadow: 0 3px 6px rgba(0,0,0,0.6);
+            animation: pulse 1.5s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from {
+                transform: scale(1);
+            }
+
+            to {
+                transform: scale(1.05);
+            }
+        }
+
+        .gift-box {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            transition: transform 0.3s;
+        }
+
+            .gift-box:hover {
+                transform: scale(1.08) rotate(2deg);
+            }
+
+        .gift-lid {
+            position: absolute;
+            width: 196px;
+            height: 45px;
+            background: #e94560;
+            top: -40px;
+            left: -8px;
+            border-radius: 4px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+            z-index: 2;
+            border: 2px solid #ff6b81;
+        }
+
+            .gift-lid::after {
+                content: '';
+                position: absolute;
+                width: 35px;
+                height: 100%;
+                background: #f9d56e;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+
+        .gift-body {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #d32f2f;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+            border: 2px solid #e94560;
+        }
+
+            .gift-body::after {
+                content: '';
+                position: absolute;
+                width: 35px;
+                height: 100%;
+                background: #f9d56e;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+
+        .gift-bow {
+            position: absolute;
+            width: 50px;
+            height: 30px;
+            background: #f9d56e;
+            top: -65px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 50% 50% 0 0;
+            z-index: 3;
+        }
+
+            .gift-bow::before, .gift-bow::after {
+                content: '';
+                position: absolute;
+                width: 40px;
+                height: 40px;
+                border: 8px solid #f9d56e;
+                border-radius: 50%;
+                top: -15px;
+            }
+
+            .gift-bow::before {
+                left: -25px;
+                transform: rotate(-30deg);
+            }
+
+            .gift-bow::after {
+                right: -25px;
+                transform: rotate(30deg);
+            }
+
+        .gift-box-wrapper.hidden {
+            opacity: 0;
+            transform: scale(0.5) translateY(200px);
+            pointer-events: none;
+        }
+
+        /* --- GIAI ĐOẠN 2: VÒNG QUAY NÂNG CẤP --- */
+        .wheel-main-container {
+            position: absolute;
+            z-index: 5;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 600px;
+            height: 680px;
+            animation: zoomIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        @keyframes zoomIn {
+            from {
+                transform: scale(0.3) rotate(-90deg);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(0.9) translateY(-10px);
+                opacity: 1;
+            }
+        }
+
+        .banner-top {
+            background: linear-gradient(to bottom, #e53935, #b71c1c);
+            border: 8px solid #f1c40f;
+            border-bottom: none;
+            padding: 12px 40px;
+            border-radius: 120px 120px 0 0;
+            text-align: center;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 12;
+            width: 380px;
+        }
+
+            .banner-top h1 {
+                font-size: 30px;
+                color: #fffde7;
+                text-transform: uppercase;
+                font-weight: 900;
+                letter-spacing: 1.5px;
+                text-shadow: 3px 3px 0px #7b1fa2, -3px -3px 0px #7b1fa2, 3px -3px 0px #7b1fa2, -3px 3px 0px #7b1fa2;
+                line-height: 1.2;
+            }
+
+        .banner-leds {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
+
+        .bled {
+            position: absolute;
+            width: 7px;
+            height: 7px;
+            background: #fff;
+            border-radius: 50%;
+            animation: flash 0.4s infinite alternate;
+        }
+
+            .bled:nth-child(1) {
+                top: 14px;
+                left: 50px;
+            }
+
+            .bled:nth-child(2) {
+                top: 8px;
+                left: 110px;
+                animation-delay: 0.15s;
+            }
+
+            .bled:nth-child(3) {
+                top: 6px;
+                left: 190px;
+            }
+
+            .bled:nth-child(4) {
+                top: 8px;
+                left: 270px;
+                animation-delay: 0.15s;
+            }
+
+            .bled:nth-child(5) {
+                top: 14px;
+                left: 330px;
+            }
+
+        @keyframes flash {
+            0% {
+                background: #fff;
+                box-shadow: 0 0 8px #fff, 0 0 15px #ffeb3b;
+            }
+
+            100% {
+                background: #ff9800;
+                box-shadow: 0 0 2px #ff9800;
+            }
+        }
+
+        .wheel-outer-ring {
+            width: 510px;
+            height: 510px;
+            border-radius: 50%;
+            background: #f1c40f;
+            border: 10px solid #f39c12;
+            position: relative;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.45);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: -8px;
+            z-index: 10;
+        }
+
+        .ring-leds {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .rled {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background: #fff;
+            border-radius: 50%;
+            left: calc(50% - 7px);
+            top: 5px;
+            transform-origin: 7px 240px;
+            box-shadow: 0 0 6px #fff;
+        }
+
+            .rled:nth-child(even) {
+                background: #ffeb3b;
+                animation: flash 0.3s infinite alternate;
+            }
+
+            .rled:nth-child(1) {
+                transform: rotate(0deg);
+            }
+
+            .rled:nth-child(2) {
+                transform: rotate(22.5deg);
+            }
+
+            .rled:nth-child(3) {
+                transform: rotate(45deg);
+            }
+
+            .rled:nth-child(4) {
+                transform: rotate(67.5deg);
+            }
+
+            .rled:nth-child(5) {
+                transform: rotate(90deg);
+            }
+
+            .rled:nth-child(6) {
+                transform: rotate(112.5deg);
+            }
+
+            .rled:nth-child(7) {
+                transform: rotate(135deg);
+            }
+
+            .rled:nth-child(8) {
+                transform: rotate(157.5deg);
+            }
+
+            .rled:nth-child(9) {
+                transform: rotate(180deg);
+            }
+
+            .rled:nth-child(10) {
+                transform: rotate(202.5deg);
+            }
+
+            .rled:nth-child(11) {
+                transform: rotate(225deg);
+            }
+
+            .rled:nth-child(12) {
+                transform: rotate(247.5deg);
+            }
+
+            .rled:nth-child(13) {
+                transform: rotate(270deg);
+            }
+
+            .rled:nth-child(14) {
+                transform: rotate(292.5deg);
+            }
+
+            .rled:nth-child(15) {
+                transform: rotate(315deg);
+            }
+
+            .rled:nth-child(16) {
+                transform: rotate(337.5deg);
+            }
+
+        .wheel-plate-svg {
+            width: 466px;
+            height: 466px;
+            border-radius: 50%;
+            border: 6px solid #ffffff;
+            background-color: #fff;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.2);
+            transition: transform 4s cubic-bezier(0.1, 0.8, 0.1, 1);
+        }
+
+        .wheel-txt {
+            font-size: 14px;
+            font-weight: 900;
+            fill: #ffffff;
+            stroke: #111111;
+            stroke-width: 4px;
+            paint-order: stroke fill;
+            text-anchor: middle;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .pointer-top {
+            position: absolute;
+            top: 76px;
+            z-index: 15;
+            width: 38px;
+            height: 58px;
+            background-color: #d32f2f;
+            border: 3.5px solid #fffde7;
+            border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.35);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform: rotate(180deg);
+        }
+
+            .pointer-top::after {
+                content: '';
+                width: 10px;
+                height: 10px;
+                background: #ffeb3b;
+                border-radius: 50%;
+            }
+
+        .center-spin-btn {
+            position: absolute;
+            width: 86px;
+            height: 86px;
+            background: radial-gradient(circle, #ffeb3b 0%, #fbc02d 100%);
+            border: 5px solid #f39c12;
+            border-radius: 50%;
+            z-index: 16;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.4), inset 0 -3px 5px rgba(0,0,0,0.2);
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 36px;
+            color: #d32f2f;
+            transition: transform 0.1s;
+        }
+
+            .center-spin-btn:hover {
+                transform: scale(1.05);
+            }
+
+            .center-spin-btn:active {
+                transform: scale(0.95);
+            }
+
+            .center-spin-btn.disabled {
+                background: #94a3b8 !important;
+                color: #cbd5e1 !important;
+                border-color: #cbd5e1 !important;
+                cursor: not-allowed;
+                box-shadow: none !important;
+            }
+
+        .wheel-stand {
+            width: 290px;
+            height: 40px;
+            background: linear-gradient(to bottom, #c62828, #880e4f);
+            border-radius: 14px 14px 4px 4px;
+            margin-top: -14px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            z-index: 9;
+            border-bottom: 6px solid #560432;
+        }
+
+        .counter-box {
+            margin-top: 15px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 6px 22px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .counter-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #94a3b8;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        .stars-container {
+            display: flex;
+            gap: 6px;
+        }
+
+        .star {
+            font-size: 22px;
+            color: #ffd100;
+            text-shadow: 0 0 6px rgba(255,209,0,0.5);
+            transition: all 0.4s;
+        }
+
+            .star.used {
+                color: #475569;
+                text-shadow: none;
+                transform: scale(0.8);
+            }
+
+        .history-panel {
+            position: absolute;
+            left: 40px;
+            width: 260px;
+            height: 500px;
+            background: rgba(15, 23, 42, 0.85);
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 22px;
+            display: none;
+            flex-direction: column;
+            z-index: 3;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+            animation: slideRight 0.6s ease forwards;
+        }
+
+        @keyframes slideRight {
+            from {
+                opacity: 0;
+                transform: translateX(-40px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .history-title {
+            font-size: 16px;
+            text-transform: uppercase;
+            color: #ffd100;
+            border-bottom: 2px solid #ffd100;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        .history-list {
+            list-style: none;
+            overflow-y: auto;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .history-item {
+            background: rgba(255,255,255,0.06);
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            border-left: 5px solid #ff8500;
+            color: #fff;
+        }
+
+        .popup-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+            backdrop-filter: blur(4px);
+        }
+
+            .popup-overlay.active {
+                opacity: 1;
+                pointer-events: auto;
+            }
+
+        .popup-content {
+            background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+            width: 450px;
+            padding: 40px;
+            border-radius: 24px;
+            text-align: center;
+            border: 4px solid #ffd100;
+            box-shadow: 0 0 40px rgba(255,209,0,0.4);
+            transform: scale(0.7);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .popup-overlay.active .popup-content {
+            transform: scale(1);
+        }
+
+        .popup-icon {
+            font-size: 65px;
+            margin-bottom: 10px;
+            animation: bounce 0.8s infinite alternate;
+        }
+
+        @keyframes bounce {
+            from {
+                transform: translateY(0);
+            }
+
+            to {
+                transform: translateY(-10px);
+            }
+        }
+
+        .popup-content h2 {
+            font-size: 28px;
+            color: #fff;
+            text-transform: uppercase;
+            font-weight: 900;
+        }
+
+        .popup-prize {
+            font-size: 30px;
+            color: #ffd100;
+            font-weight: 900;
+            margin: 22px 0;
+            text-shadow: 0 0 12px rgba(255,209,0,0.5);
+            text-transform: uppercase;
+        }
+
+        .popup-btn {
+            background: #ff8500;
+            color: white;
+            border: none;
+            padding: 12px 40px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 6px 18px rgba(255,133,0,0.45);
+            transition: background 0.2s;
+            text-transform: uppercase;
+        }
+
+            .popup-btn:hover {
+                background: #ffa500;
+            }
+    </style>
+</head>
+<body>
+
+    <div class="slide-container">
+
+        <!-- GIAI ĐOẠN 1: HỘP QUÀ KHỞI ĐỘNG -->
+        <div class="gift-box-wrapper" id="giftBoxWrapper" onclick="openGiftBox()">
+            <h2 class="gift-title">Bé chạm mở hộp quà nhé!</h2>
+            <div class="gift-bow"></div>
+            <div class="gift-box">
+                <div class="gift-lid"></div>
+                <div class="gift-body"></div>
+            </div>
+        </div>
+
+        <!-- BẢNG LỊCH SỬ BÊN TRÁI -->
+        <div class="history-panel" id="historyPanel">
+            <div class="history-title">Hình khối đã học</div>
+            <ul class="history-list" id="historyList"></ul>
+        </div>
+
+        <!-- GIAI ĐOẠN 2: VÒNG QUAY ĐỐI XỨNG TUYỆT ĐỐI -->
+        <div class="wheel-main-container" id="wheelContainer">
+            <div class="banner-top">
+                <div class="banner-leds">
+                    <div class="bled"></div><div class="bled"></div><div class="bled"></div><div class="bled"></div><div class="bled"></div>
+                </div>
+                <h1>Vòng Quay<br>Kỳ Diệu</h1>
+            </div>
+
+            <div class="pointer-top"></div>
+
+            <div class="wheel-outer-ring">
+                <div class="ring-leds">
+                    <div class="rled"></div><div class="rled"></div><div class="rled"></div><div class="rled"></div>
+                    <div class="rled"></div><div class="rled"></div><div class="rled"></div><div class="rled"></div>
+                    <div class="rled"></div><div class="rled"></div><div class="rled"></div><div class="rled"></div>
+                    <div class="rled"></div><div class="rled"></div><div class="rled"></div><div class="rled"></div>
+                </div>
+
+                <!-- Đĩa xoay SVG căn chỉnh đối xứng từ trục dọc 12 giờ -->
+                <svg class="wheel-plate-svg" id="wheel" viewBox="0 0 500 500">
+                    <g transform="translate(250, 250)">
+
+                        <!-- Ô 1: HÌNH VUÔNG (Màu Xanh Dương) | Góc: 0° đến 60° -->
+                        <path d="M 0 0 L 0 -250 A 250 250 0 0 1 216.5063 -125 Z" fill="#0081ff" />
+                        <g transform="rotate(30)">
+                            <rect x="-22" y="-172" width="44" height="44" fill="#ffffff" filter="drop-shadow(0 3px 2px rgba(0,0,0,0.15))" />
+                            <text x="0" y="-105" class="wheel-txt">Hình Vuông</text>
+                        </g>
+
+                        <!-- Ô 2: HÌNH TAM GIÁC (Màu Xanh Lá) | Góc: 60° đến 120° -->
+                        <path d="M 0 0 L 216.5063 -125 A 250 250 0 0 1 216.5063 125 Z" fill="#2cb742" />
+                        <g transform="rotate(90)">
+                            <polygon points="0,-170 -24,-128 24,-128" fill="#ffffff" filter="drop-shadow(0 3px 2px rgba(0,0,0,0.15))" />
+                            <text x="0" y="-105" class="wheel-txt" transform="rotate(90, 0, -105)">Hình Tam Giác</text>
+                        </g>
+
+                        <!-- Ô 3: HÌNH CHỮ NHẬT (Màu Tím) | Góc: 120° đến 180° -->
+                        <path d="M 0 0 L 216.5063 125 A 250 250 0 0 1 0 250 Z" fill="#7d26cd" />
+                        <g transform="rotate(150)">
+                            <rect x="-30" y="-168" width="60" height="36" fill="#ffffff" filter="drop-shadow(0 3px 2px rgba(0,0,0,0.15))" />
+                            <text x="0" y="-105" class="wheel-txt" transform="rotate(180, 0, -105)">Hình Chữ Nhật</text>
+                        </g>
+
+                        <!-- Ô 4: HÌNH TRÁI TIM (Màu Hồng) | Góc: 180° đến 240° -->
+                        <path d="M 0 0 L 0 250 A 250 250 0 0 1 -216.5063 125 Z" fill="#f63366" />
+                        <g transform="rotate(210)">
+                            <g transform="translate(0, -150) rotate(45) scale(0.8)">
+                                <rect x="-20" y="-20" width="40" height="40" fill="#ffffff" />
+                                <circle cx="0" cy="-20" r="20" fill="#ffffff" />
+                                <circle cx="-20" cy="0" r="20" fill="#ffffff" />
+                            </g>
+                            <text x="0" y="-105" class="wheel-txt" transform="rotate(180, 0, -105)">Hình Trái Tim</text>
+                        </g>
+
+                        <!-- Ô 5: HÌNH NGÔI SAO (Màu Vàng) | Góc: 240° đến 300° -->
+                        <path d="M 0 0 L -216.5063 125 A 250 250 0 0 1 -216.5063 -125 Z" fill="#ffd100" />
+                        <g transform="rotate(270)">
+                            <polygon points="0,-170 7,-146 30,-146 11,-132 18,-108 0,-122 -18,-108 -11,-132 -30,-146 -7,-146" fill="#ffffff" filter="drop-shadow(0 3px 2px rgba(0,0,0,0.15))" />
+                            <text x="0" y="-95" class="wheel-txt" transform="rotate(-90, 0, -95)">Hình Ngôi Sao</text>
+                        </g>
+
+                        <!-- Ô 6: HÌNH TRÒN (Màu Cam) | Góc: 300° đến 360° (về lại 0°) -->
+                        <path d="M 0 0 L -216.5063 -125 A 250 250 0 0 1 0 -250 Z" fill="#ff8500" />
+                        <g transform="rotate(330)">
+                            <circle cx="0" cy="-150" r="24" fill="#ffffff" filter="drop-shadow(0 3px 2px rgba(0,0,0,0.15))" />
+                            <text x="0" y="-105" class="wheel-txt">Hình Tròn</text>
+                        </g>
+                    </g>
+                </svg>
+
+                <div class="center-spin-btn" id="spinBtn" onclick="spinWheel()">★</div>
+            </div>
+
+            <div class="wheel-stand"></div>
+
+            <div class="counter-box">
+                <div class="counter-title">Lượt chơi của bé</div>
+                <div class="stars-container" id="starsContainer">
+                    <span class="star">★</span><span class="star">★</span><span class="star">★</span>
+                    <span class="star">★</span><span class="star">★</span><span class="star">★</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- POPUP KẾT QUẢ CỦA BÉ -->
+        <div class="popup-overlay" id="popup">
+            <div class="popup-content">
+                <div class="popup-icon">✨</div>
+                <h2>Hoan Hô Bé!</h2>
+                <p style="color: #cbd5e1; font-size: 15px;">Bé đã quay trúng vào khối:</p>
+                <div class="popup-prize" id="popupPrize">HÌNH TRÒN</div>
+                <button class="popup-btn" onclick="closePopup()">Học tiếp nào</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Mảng trúng thưởng tương ứng theo thứ tự vòng quay kim đồng hồ (Bắt đầu từ đỉnh 12h hướng sang phải)
+        const shapes = [
+            { name: "Hình Vuông 🟦", color: "#0081ff" },
+            { name: "Hình Tam Giác 🔺", color: "#2cb742" },
+            { name: "Hình Chữ Nhật █", color: "#7d26cd" },
+            { name: "Hình Trái Tim 💖", color: "#f63366" },
+            { name: "Hình Ngôi Sao ⭐", color: "#ffd100" },
+            { name: "Hình Tròn 🔴", color: "#ff8500" }
+        ];
+
+        let maxSpins = 6;
+        let currentSpins = 0;
+        let isSpinning = false;
+        let currentRotation = 0;
+
+        function openGiftBox() {
+            document.getElementById('giftBoxWrapper').classList.add('hidden');
+            confetti({ particleCount: 130, spread: 80, origin: { y: 0.6 } });
+
+            setTimeout(() => {
+                document.getElementById('wheelContainer').style.display = 'flex';
+                document.getElementById('historyPanel').style.display = 'flex';
+            }, 400);
+        }
+
+        function spinWheel() {
+            if (isSpinning || currentSpins >= maxSpins) return;
+
+            isSpinning = true;
+            currentSpins++;
+
+            const stars = document.getElementById('starsContainer').children;
+            stars[maxSpins - currentSpins].classList.add('used');
+
+            const spinBtn = document.getElementById('spinBtn');
+            spinBtn.classList.add('disabled');
+
+            // Tính ngẫu nhiên ô trúng
+            const targetIndex = Math.floor(Math.random() * 6);
+
+            // Logic tính toán góc dừng chuẩn xác:
+            // Ô Vuông nằm từ góc 0 đến 60 độ -> Tâm nằm ở 30 độ.
+            // Để đưa tâm ô đó về đỉnh kim (vị trí góc 0), ta lấy 360 trừ đi góc tâm của ô.
+            const targetDegrees = 360 - (targetIndex * 60 + 30);
+            const extraRounds = 6 * 360;
+
+            currentRotation += extraRounds + targetDegrees - (currentRotation % 360);
+
+            const wheel = document.getElementById('wheel');
+            wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+            setTimeout(() => {
+                showResult(shapes[targetIndex]);
+            }, 4000);
+        }
+
+        function showResult(result) {
+            document.getElementById('popupPrize').innerText = result.name;
+            document.getElementById('popup').classList.add('active');
+
+            var duration = 2 * 1000; var end = Date.now() + duration;
+            (function frame() {
+                confetti({ particleCount: 4, angle: 55, spread: 60, origin: { x: 0 } });
+                confetti({ particleCount: 4, angle: 125, spread: 60, origin: { x: 1 } });
+                if (Date.now() < end) { requestAnimationFrame(frame); }
+            }());
+
+            const historyList = document.getElementById('historyList');
+            const li = document.createElement('li');
+            li.className = 'history-item';
+            li.style.borderLeftColor = result.color;
+            li.innerText = `Lần ${currentSpins}: Bé tìm thấy ${result.name.split(' ')[0]} ${result.name.split(' ')[1]}`;
+            historyList.insertBefore(li, historyList.firstChild);
+        }
+
+        function closePopup() {
+            document.getElementById('popup').classList.remove('active');
+            isSpinning = false;
+
+            const spinBtn = document.getElementById('spinBtn');
+            if (currentSpins >= maxSpins) {
+                spinBtn.innerText = "✖";
+                spinBtn.style.fontSize = "26px";
+            } else {
+                spinBtn.classList.remove('disabled');
+            }
+        }
+    </script>
+</body>
+</html>
